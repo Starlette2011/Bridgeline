@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bridgeline — school notices, made clear</title>
+  <meta name="description" content="Bridgeline turns confusing school notices into plain-language summaries, deadlines, calendar reminders, read-aloud audio and replies, in your own language.">
+  <meta name="theme-color" content="#0f5e63">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500;1,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <noscript><p style="padding:1rem">Bridgeline needs JavaScript. Please enable it and reload.</p></noscript>
+  <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+
+  <header class="top">
+    <div class="brand">
+      <img src="icon.svg" alt="" width="40" height="40">
+      <div>
+        <h1>Bridge<span class="accent">line</span></h1>
+        <p data-i18n="tagline">School notices, made clear — in your language.</p>
+      </div>
+    </div>
+    <div class="tools">
+      <label class="sr" for="lang">Language</label>
+      <select id="lang"></select>
+      <button type="button" id="aiBtn" class="icon-btn wide" title="Settings" aria-label="Settings">⚙ Settings</button>
+      <button type="button" id="easyBtn" class="icon-btn wide" aria-pressed="false" title="Easy mode: big, simple view" data-i18n="easy">Easy mode</button>
+      <button type="button" id="fontBtn" class="icon-btn" aria-pressed="false" title="Easy-reading font" aria-label="Easy-reading font">Aa</button>
+      <button type="button" id="fontMinus" class="icon-btn" data-i18n-title="fontSmaller" title="Smaller text" aria-label="Smaller text">A−</button>
+      <button type="button" id="fontPlus" class="icon-btn" data-i18n-title="fontLarger" title="Larger text" aria-label="Larger text">A+</button>
+      <button type="button" id="contrastBtn" class="icon-btn" aria-pressed="false" data-i18n-title="contrast" title="High contrast" aria-label="High contrast"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+      <button type="button" id="themeBtn" class="icon-btn" aria-pressed="false" data-i18n-title="theme" title="Dark mode" aria-label="Dark mode">☾</button>
+      <span id="modeBadge" class="badge" role="status"></span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="t-analyze" data-tab="analyze" aria-selected="true" aria-controls="tab-analyze" data-i18n="tabAnalyze">Understand a notice</button>
+    <button role="tab" id="t-notices" data-tab="notices" aria-selected="false" aria-controls="tab-notices" tabindex="-1" data-i18n="tabNotices">My notices</button>
+    <button role="tab" id="t-reply" data-tab="reply" aria-selected="false" aria-controls="tab-reply" tabindex="-1" data-i18n="tabReply">Reply</button>
+    <button role="tab" id="t-ask" data-tab="ask" aria-selected="false" aria-controls="tab-ask" tabindex="-1" data-i18n="tabAsk">Ask</button>
+    <button role="tab" id="t-teacher" data-tab="teacher" aria-selected="false" aria-controls="tab-teacher" tabindex="-1" data-i18n="tabTeacher">For schools</button>
+  </nav>
+
+  <main id="main">
+    <section id="aiPanel" class="card" hidden aria-labelledby="aiTitle">
+      <h2 id="aiTitle">Settings</h2>
+      <h3 class="sub">Free translation</h3>
+      <p class="muted small">Translation tries your device first (private and offline, in browsers that support it). If that is not available, short pieces of the notice are sent to MyMemory, a free online service, with emails, phone numbers, IDs and the names you listed masked first.</p>
+      <label class="check"><input type="checkbox" id="mtOnline" checked> <span>Allow free online translation (MyMemory)</span></label>
+      <label><span class="label">Email (optional)</span><input id="mtEmail" type="text" autocomplete="email" placeholder="you@example.com"></label>
+      <p class="muted small">Adding an email raises the free daily limit of MyMemory from about 5,000 to 50,000 characters. It is stored only on this device and sent only to MyMemory.</p>
+      <div id="keyBlock">
+        <h3 class="sub">AI with your own key (best quality)</h3>
+        <p class="muted small">Unlocks natural translation in 26 languages, photo and PDF reading, smarter replies and Q&amp;A. Your key is stored only on this device and sent only to api.anthropic.com. Use a key with a low spending limit, and never on a shared computer.</p>
+        <div class="grid2">
+          <label><span class="label">API key</span><input id="aiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..."></label>
+          <label><span class="label">Model</span><input id="aiModel" type="text" spellcheck="false" placeholder="claude-sonnet-5-5"></label>
+        </div>
+      </div>
+      <div class="row wrap">
+        <button type="button" id="aiSave" class="btn primary">Save</button>
+        <button type="button" id="aiRemove" class="btn ghost">Remove API key</button>
+        <span id="aiStatus" class="muted" role="status"></span>
+      </div>
+    </section>
+
+    <div id="demoBanner" class="banner" hidden></div>
+    <div id="dueBanner" class="banner warn" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- 1. Understand -->
+    <section id="tab-analyze" class="panel" role="tabpanel" aria-labelledby="t-analyze">
+      <div class="card input-card" id="dropZone">
+        <label for="noticeText" class="label" data-i18n="pasteLabel">Paste the notice text</label>
+        <textarea id="noticeText" dir="auto" rows="8" data-i18n-ph="pastePh" placeholder="Paste a school message here, or add a photo or PDF…"></textarea>
+
+        <div class="row wrap">
+          <label class="btn ghost" for="cameraInput"><span aria-hidden="true">📷</span> <span data-i18n="takePhoto">Take photo</span></label>
+          <input id="cameraInput" class="sr" type="file" accept="image/*" capture="environment">
+          <label class="btn ghost" for="fileInput"><span aria-hidden="true">📎</span> <span data-i18n="uploadFile">Upload photo or PDF</span></label>
+          <input id="fileInput" class="sr" type="file" accept="image/*,application/pdf">
+          <span id="fileName" class="muted"></span>
+          <button type="button" id="clearBtn" class="btn link" data-i18n="clear">Clear</button>
+        </div>
+
+        <div class="row wrap samples">
+          <span class="muted" data-i18n="samples">Try a sample:</span>
+          <span id="sampleChips" class="chips"></span>
+        </div>
+
+        <details class="options">
+          <summary><span data-i18n="level">Reading level</span> · <span id="levelLabel"></span></summary>
+          <div class="grid2">
+            <label>
+              <span class="label" data-i18n="level">Reading level</span>
+              <select id="level">
+                <option value="3" data-i18n="lvl3">3rd grade (simplest)</option>
+                <option value="5" data-i18n="lvl5" selected>5th grade</option>
+                <option value="8" data-i18n="lvl8">8th grade</option>
+              </select>
+            </label>
+            <label>
+              <span class="label" data-i18n="hideNames">Names to hide (comma-separated)</span>
+              <input id="hideNames" type="text" placeholder="e.g. Maria, Lopez">
+            </label>
+          </div>
+          <label class="check"><input type="checkbox" id="redact" checked> <span data-i18n="hide">Hide emails and phone numbers before AI sees them</span></label>
+          <p class="muted small">Photos and PDFs are sent to the AI as they are. Paste the text if you want private details hidden.</p>
+        </details>
+
+        <div class="row">
+          <button type="button" id="analyzeBtn" class="btn primary big" data-i18n="analyze">Explain this notice</button>
+          <span id="status" class="muted" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div id="result" aria-live="polite"></div>
+    </section>
+
+    <!-- 2. My notices -->
+    <section id="tab-notices" class="panel" role="tabpanel" aria-labelledby="t-notices" hidden>
+      <div id="agenda"></div>
+      <div id="noticeList"></div>
+      <div class="card">
+        <div class="row wrap">
+          <button type="button" id="allIcs" class="btn ghost" data-i18n="addAll">Add everything to calendar (.ics)</button>
+          <button type="button" id="remindBtn" class="btn ghost" data-i18n="reminders">Remind me on this device</button>
+          <button type="button" id="backupBtn" class="btn ghost" data-i18n="backup">Back up (.json)</button>
+          <label class="btn ghost" for="restoreInput" data-i18n="restore">Restore</label>
+          <input id="restoreInput" class="sr" type="file" accept="application/json">
+          <button type="button" id="wipeBtn" class="btn danger" data-i18n="clearAll">Delete all my data</button>
+        </div>
+        <p class="muted small" data-i18n="savedLocal">Saved on this device only. Nothing is stored on our server.</p>
+      </div>
+    </section>
+
+    <!-- 3. Reply -->
+    <section id="tab-reply" class="panel" role="tabpanel" aria-labelledby="t-reply" hidden>
+      <div class="card">
+        <p class="muted" data-i18n="replyIntro">Say what you want to tell the school, in your own language. Bridgeline writes a polite English message.</p>
+        <div class="grid2">
+          <label><span class="label" data-i18n="forNotice">About this notice</span><select id="replyNotice"></select></label>
+          <label><span class="label" data-i18n="quick">Quick reply</span>
+            <select id="replyIntent">
+              <option value="custom" data-i18n="i_custom">Custom message</option>
+              <option value="confirm" data-i18n="i_confirm">We will do it / confirm</option>
+              <option value="decline" data-i18n="i_decline">We cannot take part</option>
+              <option value="question" data-i18n="i_question">I have a question</option>
+              <option value="extension" data-i18n="i_extension">I need more time</option>
+              <option value="help_paying" data-i18n="i_help_paying">I need help paying</option>
+              <option value="interpreter" data-i18n="i_interpreter">I need an interpreter / translation</option>
+            </select>
+          </label>
+        </div>
+        <label class="label" for="replyText" data-i18n="yourWords">Your words (any language)</label>
+        <textarea id="replyText" dir="auto" rows="5"></textarea>
+        <div class="row wrap">
+          <button type="button" id="replyMic" class="btn ghost" data-i18n="dictate">Speak</button>
+          <button type="button" id="replyBtn" class="btn primary" data-i18n="makeReply">Write the English message</button>
+          <span id="replyStatus" class="muted" role="status"></span>
+        </div>
+      </div>
+      <div id="replyOut"></div>
+    </section>
+
+    <!-- 4. Ask -->
+    <section id="tab-ask" class="panel" role="tabpanel" aria-labelledby="t-ask" hidden>
+      <div class="card">
+        <p class="muted" data-i18n="askIntro">Ask anything about a notice. Answers come only from the notice, with the exact sentence shown.</p>
+        <label><span class="label" data-i18n="forNotice">About this notice</span><select id="askNotice"></select></label>
+        <div id="askSuggest" class="chips"></div>
+        <div id="chatLog" class="chat" aria-live="polite"></div>
+        <div class="row wrap">
+          <label class="sr" for="askInput">Question</label>
+          <input id="askInput" type="text" data-i18n-ph="askPh" placeholder="Type or speak your question…">
+          <button type="button" id="askMic" class="btn ghost" data-i18n="dictate">Speak</button>
+          <button type="button" id="askBtn" class="btn primary" data-i18n="send">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Teacher -->
+    <section id="tab-teacher" class="panel" role="tabpanel" aria-labelledby="t-teacher" hidden>
+      <div class="card" id="teacherIn">
+        <p class="muted" data-i18n="teacherIntro">Write your message in English. Bridgeline simplifies it and translates it for families.</p>
+        <label class="label" for="teacherTpl">Template</label>
+        <select id="teacherTpl"></select>
+        <label class="label" for="teacherText" data-i18n="teacherPh">Write a family message in English…</label>
+        <textarea id="teacherText" dir="auto" rows="7"></textarea>
+        <div id="teacherMeter" class="meter-row"></div>
+        <div id="clarityOut"></div>
+        <fieldset class="langs">
+          <legend data-i18n="languagesTo">Translate into</legend>
+          <div id="teacherLangs" class="chips"></div>
+        </fieldset>
+        <div class="row wrap">
+          <button type="button" id="teacherBtn" class="btn primary" data-i18n="simplify">Simplify and translate</button>
+          <span id="teacherStatus" class="muted" role="status"></span>
+        </div>
+      </div>
+      <div id="teacherOut"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Bridgeline is a communication aid, not an official translation. AI can make mistakes: always check dates, prices and requirements against the original notice or with the school.</p>
+  </footer>
+
+  <script src="js/ics.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/samples.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-labels.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/translate.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

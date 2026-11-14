@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bridgeline">
+  <rect width="64" height="64" rx="14" fill="#0f5e63"/>
+  <path d="M8 40h48" stroke="#fffdf8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M12 40c4-16 12-22 20-22s16 6 20 22" fill="none" stroke="#e8a33d" stroke-width="4" stroke-linecap="round"/>
+  <path d="M22 40V30M32 40V22M42 40V30" stroke="#fffdf8" stroke-width="3" stroke-linecap="round"/>
+  <path d="M8 48h48" stroke="#fffdf8" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>
+</svg>

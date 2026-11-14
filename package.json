@@ -1,0 +1,25 @@
+{
+  "name": "bridgeline",
+  "version": "1.0.0",
+  "description": "Bridgeline turns confusing school notices into plain-language summaries, deadlines, calendar reminders, read-aloud audio and ready-to-send replies, in the family's own language.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "demo": "BRIDGELINE_FORCE_DEMO=1 node server.js",
+    "test": "node --test",
+    "build": "node scripts/build-engine.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "education",
+    "accessibility",
+    "translation",
+    "hackathon",
+    "ai",
+    "social-good"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Bridgeline",
+  "short_name": "Bridgeline",
+  "description": "School notices, made clear, in your language.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ec",
+  "theme_color": "#0f5e63",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
